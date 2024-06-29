@@ -72,12 +72,7 @@ Complete a month cost analysis of each Azure resource to give an estimate total 
 The app service includes the web app and the function app.
 
 ## Architecture Explanation
-After migrating the web application to an Azure App Service and refactoring the notification logic to an Azure Function via a service bus queue message, several key benefits were achieved in terms of scalability, performance, and cost-effectiveness:
-
-Scalable Web Application to Handle Increased Traffic: The Azure App Service allows for easy scaling of the web application to handle varying levels of traffic. With auto-scaling capabilities, the application can adjust resources based on demand, ensuring optimal performance during peak times and cost savings during low-traffic periods.
-
-Azure App Service offers built-in high availability and redundancy, ensuring that the web application remains accessible and reliable. This minimizes downtime and provides a better user experience.
-
-When an admin sends a notification, it won't take long now due to the asynchronous processing capabilities of Azure Functions and the Service Bus queue. This decouples the notification logic from the main web application, allowing notifications to be processed independently and quickly.
-
-By leveraging Azure App Service and Azure Functions, the existing architecture is optimized for cost savings. Resources are allocated dynamically, and costs are incurred only for the resources used, avoiding the need for over-provisioning.
+In this project I used 4 services: App service, Service bus, Azure Postgres, Azure function
+App service: the pre-existing TechConf web all is already provided so I used app service to deploy quickly and the traffic is not really high so I can use free tier for cost-optimization
+Service bus and Azure function: Azure service bus (Basic tier) cost $0.05 per million operations, almost free for this application and Azure function includes a monthly free grant of 1 million requests. Aditionally, the notification or sending email are moved to background jobs in Azure so I don't need to loop in all attendees to do something and the result is better performance
+Azure Postgres: the most expensive service in this project. I choose this because it offers a high availability SLA of up to 99.99% and built-in automation for database maintenance, patching,...
