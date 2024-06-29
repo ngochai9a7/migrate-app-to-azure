@@ -73,6 +73,9 @@ The app service includes the web app and the function app.
 
 ## Architecture Explanation
 In this project I used 4 services: App service, Service bus, Azure Postgres, Azure function
+
 App service: the pre-existing TechConf web all is already provided so I used app service to deploy quickly and the traffic is not really high so I can use free tier for cost-optimization
+
 Service bus and Azure function: Azure service bus (Basic tier) cost $0.05 per million operations, almost free for this application and Azure function includes a monthly free grant of 1 million requests. Aditionally, the notification or sending email are moved to background jobs in Azure so I don't need to loop in all attendees to do something and the result is better performance
+
 Azure Postgres: the most expensive service in this project. I choose this because it offers a high availability SLA of up to 99.99% and built-in automation for database maintenance, patching,...
