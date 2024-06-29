@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from flask import Flask, render_template, url_for, request, redirect, flash, make_response, session
 from flask_sqlalchemy import SQLAlchemy 
-from azure.servicebus import ServiceBusClient, ServiceBusMessage
+from azure.servicebus import QueueClient, Message
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 import logging
@@ -13,8 +13,8 @@ app.config.from_object('config.DevelopmentConfig')
 
 app.secret_key = app.config.get('SECRET_KEY')
 
-queue_client = QueueClient.from_connection_string(app.config.get('Endpoint=sb://techcon.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=ol4Q+iEGunzyZMgsRbCPpKjVVmo0Z3Qrf+ASbIJuswM='),
-                                                 app.config.get('notificationqueue'))
+queue_client = QueueClient.from_connection_string(app.config.get('SERVICE_BUS_CONNECTION_STRING'),
+                                                 app.config.get('SERVICE_BUS_QUEUE_NAME'))
 
 class Attendee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -113,11 +113,13 @@ def notification():
         notification.submitted_date = datetime.utcnow()
 
         try:
-            db.session.add(notification)
+            db.session.add(notification)        
             db.session.commit()
 
-            message = ServiceBusMessage(str(notification.id))
-            queue_client.send_messages(message)
+            notification_id = notification.id
+
+            msg = Message(str(notification_id))
+            queue_client.send(msg)          
 
             return redirect('/Notifications')
         except :
