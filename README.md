@@ -61,16 +61,23 @@ You will need to install the following locally:
 ## Monthly Cost Analysis
 Complete a month cost analysis of each Azure resource to give an estimate total cost using the table below:
 
-| Azure Resource   | Service Tier | Monthly Cost |
-| ---------------- | ------------ | -------------- |
-| Azure PostgreSQL |   Basic      |   $43.55       |
-| Azure Service Bus|   Basic      |   $0.01        |
-| Azure App Service|   Basic (B1) |   $21.12       |
-| Azure Storage    |   Basic      |   $0.10        |
+| Service type                    | Region  | Description                                                                                                               | Estimated monthly cost |
+|---------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------|------------------------|
+| App Service                     | East US | Free Tier; 1 F1 (0 Core(s), 1 GB RAM, 1 GB Storage) x 729 Hours; Linux OS                                                 | $0.00                  |
+| Azure Database for PostgreSQL   | East US | Single Server Deployment, Basic Tier, 1 Gen 5 (1 vCore) x 730 Hours, 5 GiB Storage, 100 GiB Additional Backup storage - LRS redundancy | $35.32                 |
+| Service Bus                     | East US | Basic tier: 1 million messaging operations                                                                                | $0.05                  |
+| Azure Functions                 | East US | Consumption tier, Pay as you go, 128 MB memory, 100 milliseconds execution time, 5 executions/mo                          | $0.00                  |
+
 
 The app service includes the web app and the function app.
 
 ## Architecture Explanation
-The azure web app was already built out, I only had to change the environment variables within config.py and refactor the notification flow within app.py. Everything else was already configured. The costs are reasonable, outside of the PostgreSQL database, which is by far the most expensive part of the architecture. Creating a service bus namespace to handle the notifications is a good idea, but if it could all be saved to a less expensive database that would be the most straightforward way to lower costs. 
+After migrating the web application to an Azure App Service and refactoring the notification logic to an Azure Function via a service bus queue message, several key benefits were achieved in terms of scalability, performance, and cost-effectiveness:
 
-Other than changing up the database, everthing else is available at a reasonable cost.
+Scalable Web Application to Handle Increased Traffic: The Azure App Service allows for easy scaling of the web application to handle varying levels of traffic. With auto-scaling capabilities, the application can adjust resources based on demand, ensuring optimal performance during peak times and cost savings during low-traffic periods.
+
+Azure App Service offers built-in high availability and redundancy, ensuring that the web application remains accessible and reliable. This minimizes downtime and provides a better user experience.
+
+When an admin sends a notification, it won't take long now due to the asynchronous processing capabilities of Azure Functions and the Service Bus queue. This decouples the notification logic from the main web application, allowing notifications to be processed independently and quickly.
+
+By leveraging Azure App Service and Azure Functions, the existing architecture is optimized for cost savings. Resources are allocated dynamically, and costs are incurred only for the resources used, avoiding the need for over-provisioning.
