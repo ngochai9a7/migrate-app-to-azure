@@ -81,4 +81,3 @@ Azure App Service offers built-in high availability and redundancy, ensuring tha
 When an admin sends a notification, it won't take long now due to the asynchronous processing capabilities of Azure Functions and the Service Bus queue. This decouples the notification logic from the main web application, allowing notifications to be processed independently and quickly.
 
 By leveraging Azure App Service and Azure Functions, the existing architecture is optimized for cost savings. Resources are allocated dynamically, and costs are incurred only for the resources used, avoiding the need for over-provisioning.
-a
