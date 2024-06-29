@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from flask import Flask, render_template, url_for, request, redirect, flash, make_response, session
 from flask_sqlalchemy import SQLAlchemy 
-from azure.servicebus import QueueClient, Message
+from azure.servicebus import ServiceBusClient, ServiceBusMessage
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 import logging
@@ -13,8 +13,8 @@ app.config.from_object('config.DevelopmentConfig')
 
 app.secret_key = app.config.get('SECRET_KEY')
 
-queue_client = QueueClient.from_connection_string(app.config.get('SERVICE_BUS_CONNECTION_STRING'),
-                                                 app.config.get('SERVICE_BUS_QUEUE_NAME'))
+queue_client = QueueClient.from_connection_string(app.config.get('Endpoint=sb://techcon.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=ol4Q+iEGunzyZMgsRbCPpKjVVmo0Z3Qrf+ASbIJuswM='),
+                                                 app.config.get('notificationqueue'))
 
 class Attendee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -113,37 +113,12 @@ def notification():
         notification.submitted_date = datetime.utcnow()
 
         try:
-            db.session.add(notification)        
+            db.session.add(notification)
             db.session.commit()
 
-            notification_id = notification.id
+            message = ServiceBusMessage(str(notification.id))
+            queue_client.send_messages(message)
 
-            msg = Message(str(notification_id))
-            queue_client.send(msg)          
-            
-            """
-used the following blog post to learn how to send messages to service bus queue:
-https://devblogs.microsoft.com/premier-developer/manage-service-bus-queue-messages-with-python/
-            ##################################################
-            ## TODO: Refactor This logic into an Azure Function
-            ## Code below will be replaced by a message queue
-            #################################################
-            
-            attendees = Attendee.query.all()
-
-            for attendee in attendees:
-                subject = '{}: {}'.format(attendee.first_name, notification.subject)
-                send_email(attendee.email, subject, notification.message)
-
-            notification.completed_date = datetime.utcnow()
-            notification.status = 'Notified {} attendees'.format(len(attendees))
-            db.session.commit()
-            # TODO Call servicebus queue_client to enqueue notification ID
-
-            #################################################
-            ## END of TODO
-            #################################################
-            """
             return redirect('/Notifications')
         except :
             logging.error('log unable to save notification')
